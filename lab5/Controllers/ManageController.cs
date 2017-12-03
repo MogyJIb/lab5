@@ -493,6 +493,7 @@ namespace lab5.Controllers
 
         private string GenerateQrCodeUri(string email, string unformattedKey)
         {
+            
             return string.Format(
                 AuthenicatorUriFormat,
                 _urlEncoder.Encode("lab5"),

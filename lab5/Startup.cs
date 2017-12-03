@@ -11,14 +11,21 @@ using Microsoft.Extensions.DependencyInjection;
 using lab5.Data;
 using lab5.Models;
 using lab5.Services;
+using lab5.Middleware;
 
 namespace lab5
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+            builder.AddEnvironmentVariables();
+            Configuration = builder.Build();
+           
         }
 
         public IConfiguration Configuration { get; }
@@ -36,6 +43,12 @@ namespace lab5
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
+            services.AddDbContext<UchetContext>(options => 
+                options.UseSqlServer(Configuration.GetConnectionString("UchetConnection")));
+            //добавление сессии
+            services.AddDistributedMemoryCache();
+            services.AddSession();
+
             services.AddMvc();
         }
 
@@ -50,18 +63,29 @@ namespace lab5
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Cars/Error");
             }
 
             app.UseStaticFiles();
 
             app.UseAuthentication();
 
+            // добавляем поддержку сессий
+            app.UseSession();
+
+            // добавляем компонента miidleware по инициализации базы данных
+            app.UseDbInitializer();
+
+           
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
+                    name: "areas",
+                    template: "{area:exists}/{controller=Cars}/{action=Cars}");
+                routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Cars}/{action=Cars}/{id?}");
             });
         }
     }
