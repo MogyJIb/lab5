@@ -25,7 +25,6 @@ namespace lab5
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
-           
         }
 
         public IConfiguration Configuration { get; }

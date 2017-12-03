@@ -28,11 +28,10 @@ namespace lab5.Data
         }
         if (await userManager.FindByNameAsync(adminEmail) == null)
         {
-            ApplicationUser admin = new ApplicationUser
+                ApplicationUser admin = new ApplicationUser
             {
                 Email = adminEmail,
                 UserName = adminName
-              
             };
             IdentityResult result = await userManager.CreateAsync(admin, password);
             if (result.Succeeded)
